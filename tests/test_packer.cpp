@@ -125,5 +125,56 @@ int main() {
         assert(v.back().front().second == -999);
     }
 
+    // Valid header
+
+    {
+        std::string data;
+        oo::packer<std::string> packer{data};
+        packer.add_header(); // + 4
+
+        packer.begin_block(); // + 2
+        packer.add(1, 2); // + 8
+        packer.end_block();
+
+        assert(packer.is_header_valid());
+        assert(data.size() == 14);
+
+        //
+
+        oo::packer<std::string> unpacker{data};
+        assert(unpacker.is_header_valid());
+
+        std::unordered_map<int, int> m;
+        unpacker.fill(m);
+        assert(m.size() == 1);
+        assert(m.begin()->first == 1);
+        assert(m.begin()->second == 2);
+    }
+
+    // Invalid header
+
+    {
+        std::string data;
+        oo::packer<std::string> packer{data};
+
+        packer.begin_block(); // + 2
+        packer.add(1, 2); // + 8
+        packer.end_block();
+
+        assert(!packer.is_header_valid());
+        assert(data.size() == 10);
+
+        //
+
+        oo::packer<std::string> unpacker{data};
+        assert(!unpacker.is_header_valid());
+
+        std::unordered_map<int, int> m;
+        unpacker.fill(m);
+        assert(m.size() == 1);
+        assert(m.begin()->first == 1);
+        assert(m.begin()->second == 2);
+    }
+
     return 0;
 }

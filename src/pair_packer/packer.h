@@ -19,7 +19,19 @@ namespace oo {
     class packer {
     public:
 
-        explicit packer(C &container) : m_container(container) {}
+        explicit packer(C &container) : m_container(container) {
+            if (m_container.size() >= sizeof(header) && is_header_valid()) {
+                m_block_begin += sizeof(header);
+            }
+        }
+
+        void add_header() {
+            m_container.insert(m_container.end(), std::begin(header), std::end(header));
+        }
+
+        [[nodiscard]] bool is_header_valid() const {
+            return std::memcmp(m_container.data(), header, sizeof(header)) == 0;
+        }
 
         template<class K, class V>
         void add(const K &key, const V &value) {
@@ -78,6 +90,10 @@ namespace oo {
 
             m_block_begin += index;
         }
+
+    private:
+
+        inline static const uint8_t header[]{0x00, 0x00, 0x4F, 0x4F};
 
     private:
 

@@ -9,7 +9,7 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
 project(pair_packer
-        VERSION 1.0.2
+        VERSION 1.0.3
         LANGUAGES CXX)
 
 #########
