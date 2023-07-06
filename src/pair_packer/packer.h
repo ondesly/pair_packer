@@ -45,6 +45,7 @@ namespace oo {
         void fill(std::vector<std::pair<K, V>> &container) {
             S size;
             auto index = get(m_block_begin, size);
+            container.reserve(size / (sizeof(K) + sizeof(V)));
 
             while (index < size) {
                 K key;
@@ -63,6 +64,7 @@ namespace oo {
         void fill(std::unordered_map<K, V> &container) {
             S size;
             auto index = get(m_block_begin, size);
+            container.reserve(size / (sizeof(K) + sizeof(V)));
 
             while (index < size) {
                 K key;
