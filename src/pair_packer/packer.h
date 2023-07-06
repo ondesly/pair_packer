@@ -37,6 +37,10 @@ namespace oo {
             set(m_block_begin, size);
         }
 
+        bool can_fill() const {
+            return m_block_begin < m_container.size();
+        }
+
         template<class K, class V>
         void fill(std::vector<std::pair<K, V>> &container) {
             S size;

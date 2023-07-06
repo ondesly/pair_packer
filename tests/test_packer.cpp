@@ -94,5 +94,36 @@ int main() {
         }
     }
 
+    // Unknown block count
+
+    {
+        std::string data;
+        oo::packer<std::string> packer{data};
+
+        for (int32_t i = 0; i < 1000; ++i) {
+            packer.begin_block(); // + 2
+            packer.add(i, -i); // + 8
+            packer.end_block();
+        }
+
+        assert(data.size() == 10000);
+
+        //
+
+        oo::packer<std::string> unpacker{data};
+
+        std::vector<std::vector<std::pair<int32_t, int32_t>>> v;
+        while (unpacker.can_fill()) {
+            v.emplace_back();
+            unpacker.fill(v.back());
+            assert(v.back().size() == 1);
+        }
+        assert(v.size() == 1000);
+        assert(v.front().front().first == 0);
+        assert(v.front().front().second == 0);
+        assert(v.back().front().first == 999);
+        assert(v.back().front().second == -999);
+    }
+
     return 0;
 }
