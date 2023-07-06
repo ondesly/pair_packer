@@ -9,6 +9,7 @@
 #include <string>
 
 #include <pair_packer/packer.h>
+#include <pair_packer/unpacker.h>
 
 int main() {
 
@@ -34,7 +35,7 @@ int main() {
 
         //
 
-        oo::packer<std::string> unpacker{data};
+        oo::unpacker<std::string> unpacker{data};
 
         std::vector<std::pair<uint8_t, uint32_t>> b1;
         unpacker.fill(b1);
@@ -78,7 +79,7 @@ int main() {
 
             //
 
-            oo::packer<std::vector<uint8_t>> unpacker{data};
+            oo::unpacker<std::vector<uint8_t>> unpacker{data};
 
             std::unordered_map<uint8_t, std::string> b1;
             unpacker.fill(b1);
@@ -110,7 +111,7 @@ int main() {
 
         //
 
-        oo::packer<std::string> unpacker{data};
+        oo::unpacker<std::string> unpacker{data};
 
         std::vector<std::vector<std::pair<int32_t, int32_t>>> v;
         while (unpacker.can_fill()) {
@@ -136,12 +137,11 @@ int main() {
         packer.add(1, 2); // + 8
         packer.end_block();
 
-        assert(packer.is_header_valid());
         assert(data.size() == 14);
 
         //
 
-        oo::packer<std::string> unpacker{data};
+        oo::unpacker<std::string> unpacker{data};
         assert(unpacker.is_header_valid());
 
         std::unordered_map<int, int> m;
@@ -161,12 +161,11 @@ int main() {
         packer.add(1, 2); // + 8
         packer.end_block();
 
-        assert(!packer.is_header_valid());
         assert(data.size() == 10);
 
         //
 
-        oo::packer<std::string> unpacker{data};
+        oo::unpacker<std::string> unpacker{data};
         assert(!unpacker.is_header_valid());
 
         std::unordered_map<int, int> m;

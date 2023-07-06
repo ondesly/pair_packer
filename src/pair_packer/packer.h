@@ -9,9 +9,8 @@
 #pragma once
 
 #include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+
+#include "common.h"
 
 namespace oo {
 
@@ -19,18 +18,10 @@ namespace oo {
     class packer {
     public:
 
-        explicit packer(C &container) : m_container(container) {
-            if (m_container.size() >= sizeof(header) && is_header_valid()) {
-                m_block_begin += sizeof(header);
-            }
-        }
+        explicit packer(C &container) : m_container(container) {}
 
         void add_header() {
-            m_container.insert(m_container.end(), std::begin(header), std::end(header));
-        }
-
-        [[nodiscard]] bool is_header_valid() const {
-            return std::memcmp(m_container.data(), header, sizeof(header)) == 0;
+            m_container.insert(m_container.end(), std::begin(packer_header), std::end(packer_header));
         }
 
         template<class K, class V>
@@ -49,52 +40,6 @@ namespace oo {
             set(m_block_begin, size);
         }
 
-        bool can_fill() const {
-            return m_block_begin < m_container.size();
-        }
-
-        template<class K, class V>
-        void fill(std::vector<std::pair<K, V>> &container) {
-            S size;
-            auto index = get(m_block_begin, size);
-            container.reserve(size / (sizeof(K) + sizeof(V)));
-
-            while (index < size) {
-                K key;
-                index += get(m_block_begin + index, key);
-
-                V value;
-                index += get(m_block_begin + index, value);
-
-                container.emplace_back(key, value);
-            }
-
-            m_block_begin += index;
-        }
-
-        template<class K, class V>
-        void fill(std::unordered_map<K, V> &container) {
-            S size;
-            auto index = get(m_block_begin, size);
-            container.reserve(size / (sizeof(K) + sizeof(V)));
-
-            while (index < size) {
-                K key;
-                index += get(m_block_begin + index, key);
-
-                V value;
-                index += get(m_block_begin + index, value);
-
-                container.emplace(key, value);
-            }
-
-            m_block_begin += index;
-        }
-
-    private:
-
-        inline static const uint8_t header[]{0x00, 0x00, 0x4F, 0x4F};
-
     private:
 
         C &m_container;
@@ -111,20 +56,6 @@ namespace oo {
         inline void add(const std::string &value) {
             add(S(value.size()));
             m_container.insert(m_container.end(), value.data(), value.data() + value.size());
-        }
-
-        template<class P>
-        inline size_t get(size_t index, P &value) const {
-            const auto ptr = m_container.data() + index;
-            value = *reinterpret_cast<const P *>(ptr);
-            return sizeof(P);
-        }
-
-        inline size_t get(size_t index, std::string &value) const {
-            S size;
-            index += get(index, size);
-            value.insert(value.end(), m_container.data() + index, m_container.data() + index + size);
-            return sizeof(S) + size;
         }
 
         template<class P>
